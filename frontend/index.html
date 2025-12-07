@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Editor WebApp</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background:#f2f2f2;
+            padding: 40px;
+            text-align:center;
+        }
+        .box {
+            background:white;
+            padding:30px;
+            border-radius:12px;
+            width:400px;
+            margin:auto;
+            box-shadow:0 0 15px rgba(0,0,0,0.1);
+        }
+        button {
+            padding:10px 20px;
+            border:none;
+            background:#2563eb;
+            color:white;
+            font-size:16px;
+            border-radius:8px;
+            cursor:pointer;
+        }
+        button:hover {
+            background:#1e4fcc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>Audio Processing Tool</h2>
+
+        <input type="file" id="audioFile" accept="audio/*"><br><br>
+
+        <button onclick="uploadAudio()">Process Audio</button>
+
+        <p id="status"></p>
+    </div>
+
+
+    <script>
+        async function uploadAudio() {
+
+            const fileInput = document.getElementById("audioFile");
+            if (!fileInput.files.length) {
+                alert("Please upload an audio file!");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            document.getElementById("status").innerText = "Processing... Please wait";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    document.getElementById("status").innerText = "Error processing file";
+                    return;
+                }
+
+                // file download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "processed_audio.mp3";
+                a.click();
+
+                document.getElementById("status").innerText = "Download started!";
+            }
+            catch (error) {
+                document.getElementById("status").innerText = "Server error!";
+            }
+        }
+    </script>
+
+</body>
+</html>
